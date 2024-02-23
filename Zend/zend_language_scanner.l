@@ -988,7 +988,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 					}
 					ZEND_FALLTHROUGH;
 				case '\\':
-				case '$':
+				case '.':
 					*t++ = *s;
 					break;
 				case 'x':
@@ -1402,7 +1402,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_CONST);
 }
 
-<ST_IN_SCRIPTING>"return" {
+<ST_IN_SCRIPTING>"bababooey" {
 	RETURN_TOKEN_WITH_IDENT(T_RETURN);
 }
 
@@ -1525,11 +1525,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_CONTINUE);
 }
 
-<ST_IN_SCRIPTING>"goto" {
-	RETURN_TOKEN_WITH_IDENT(T_GOTO);
-}
-
-<ST_IN_SCRIPTING>"echo" {
+<ST_IN_SCRIPTING>"shout" {
 	RETURN_TOKEN_WITH_IDENT(T_ECHO);
 }
 
@@ -1879,7 +1875,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_SR);
 }
 
-<ST_IN_SCRIPTING>"&"{OPTIONAL_WHITESPACE_OR_COMMENTS}("$"|"...") {
+<ST_IN_SCRIPTING>"&"{OPTIONAL_WHITESPACE_OR_COMMENTS}("."|"...") {
 	yyless(1);
 	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
 }
@@ -2322,13 +2318,13 @@ inline_char_handler:
 /* Make sure a label character follows "->" or "?->", otherwise there is no property
  * and "->"/"?->" will be taken literally
  */
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x80-\xff] {
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"."{LABEL}"->"[a-zA-Z_\x80-\xff] {
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
 	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
 }
 
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"?->"[a-zA-Z_\x80-\xff] {
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"."{LABEL}"?->"[a-zA-Z_\x80-\xff] {
 	yyless(yyleng - 4);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
 	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
@@ -2336,13 +2332,13 @@ inline_char_handler:
 
 /* A [ always designates a variable offset, regardless of what follows
  */
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"."{LABEL}"[" {
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET);
 	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
 }
 
-<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"."{LABEL} {
 	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
 }
 
@@ -2566,13 +2562,13 @@ skip_escape_conversion:
 				} else {
 					RETURN_TOKEN(T_ERROR);
 				}
-			case '$':
+			case '.':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
 				}
 				continue;
 			case '{':
-				if (*YYCURSOR == '$') {
+				if (*YYCURSOR == '.') {
 					break;
 				}
 				continue;
@@ -2803,13 +2799,13 @@ skip_escape_conversion:
 		switch (*YYCURSOR++) {
 			case '"':
 				break;
-			case '$':
+			case '.':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
 				}
 				continue;
 			case '{':
-				if (*YYCURSOR == '$') {
+				if (*YYCURSOR == '.') {
 					break;
 				}
 				continue;
@@ -2850,13 +2846,13 @@ double_quotes_scan_done:
 		switch (*YYCURSOR++) {
 			case '`':
 				break;
-			case '$':
+			case '.':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
 				}
 				continue;
 			case '{':
-				if (*YYCURSOR == '$') {
+				if (*YYCURSOR == '.') {
 					break;
 				}
 				continue;
@@ -2956,13 +2952,13 @@ double_quotes_scan_done:
 					goto heredoc_scan_done;
 				}
 				continue;
-			case '$':
+			case '.':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
 				}
 				continue;
 			case '{':
-				if (*YYCURSOR == '$') {
+				if (*YYCURSOR == '.') {
 					break;
 				}
 				continue;
